@@ -1,0 +1,26 @@
+# WooCommerce cart/account pages and the WordPress sample page (removed)
+/cart/   /   301
+/checkout/   /   301
+/my-account/   /   301
+/sample-page/   /   301
+/my-account/*   /   301
+/wishlist/   /   301
+/shop/   /   301
+
+# WordPress endpoints and feeds
+/feed/   /   301
+/comments/feed/   /   301
+/wp-login.php   /   301
+/wp-admin/   /   301
+/xmlrpc.php   /   301
+/wp-sitemap.xml   /sitemap.xml   301
+/sitemap_index.xml   /sitemap.xml   301
+/sitemap.html   /sitemap.xml   301
+
+# Old sitemap pieces from the WordPress sitemap plugin
+/category-sitemap.xml   /sitemap.xml   301
+/page-sitemap.xml   /sitemap.xml   301
+/post-sitemap.xml   /sitemap.xml   301
+/product-sitemap.xml   /sitemap.xml   301
+/productcat-sitemap.xml   /sitemap.xml   301
+/sitemap-misc.xml   /sitemap.xml   301

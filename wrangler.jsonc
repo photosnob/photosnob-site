@@ -1,0 +1,14 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "photosnob-site",
+  "compatibility_date": "2026-06-01",
+  "workers_dev": true,
+  "preview_urls": true,
+  "assets": {
+    "directory": "./public",
+    // WordPress URLs end in a slash: /affiliate-disclosure/ serves affiliate-disclosure/index.html; without the slash it redirects
+    "html_handling": "auto-trailing-slash",
+    "not_found_handling": "404-page"
+  },
+  "observability": { "enabled": true }
+}

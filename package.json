@@ -1,0 +1,14 @@
+{
+  "name": "photosnob-site",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "pagefind --site public",
+    "preview": "npm run build && wrangler dev",
+    "deploy": "npm run build && wrangler deploy"
+  },
+  "devDependencies": {
+    "pagefind": "^1.3.0",
+    "wrangler": "^4.0.0"
+  }
+}
