@@ -1,5 +1,5 @@
 """Turn the mirrored WordPress/WooCommerce site (photosnob.com) into a static site for Cloudflare Workers (static assets)."""
-import os, re, glob, shutil, json
+import os, re, glob, shutil, json, urllib.parse
 from bs4 import BeautifulSoup, Comment
 SRC = '/home/claude/src-photosnob/site'
 OUT = '/home/claude/photosnob-site/public'
@@ -117,7 +117,8 @@ kept = []
 for p, f in sorted(page_files()):
     if p in DROP or p.split('/')[0] in DROP: continue
     t = open(f, encoding='utf-8', errors='replace').read()
-    dst = OUT + '/index.html' if p == 'index' else f'{OUT}/{p}/index.html'
+    # Addresses with non-ASCII characters were saved %-encoded; Cloudflare looks files up by the decoded name
+    dst = OUT + '/index.html' if p == 'index' else f'{OUT}/{urllib.parse.unquote(p)}/index.html'
     os.makedirs(os.path.dirname(dst), exist_ok=True)
     open(dst, 'w').write(str(clean(p, t)))
     kept.append('/' if p == 'index' else f'/{p}/')
