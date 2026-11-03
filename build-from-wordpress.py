@@ -7,6 +7,10 @@ DOMAIN = 'photosnob.com'
 # Shop pages that only work with a live WooCommerce store, plus WordPress's default sample page: dropped, redirected home.
 DROP = {'cart', 'checkout', 'my-account', 'sample-page'}
 
+def ascii_path(p):
+    """Same rule as worker/index.js: decode %-escapes, then replace each non-ASCII character with '-'."""
+    return re.sub(r'[^\x00-\x7f]', '-', urllib.parse.unquote(p))
+
 def rel(s):
     """Make same-site URLs root-relative (works on workers.dev previews and the real domain)."""
     s = re.sub(r'https?:\\/\\/(?:www\.)?photosnob\.com(?![\w.-])', '', s)  # JSON-escaped, inside inline scripts
@@ -38,7 +42,11 @@ def clean(path, t, shell_page=False):
     for sc in s.find_all('script'):
         if sc.decomposed: continue
         body = sc.string or ''
-        if DROP_SCRIPT_IDS.match(sc.get('id', '')) or any(b in body for b in DROP_SCRIPT_BODY):
+        src = sc.get('src', '')
+        bundle = SRC + src.split('?')[0] if src.startswith('/wp-content/cache/minify/') or '/photosnob.com/wp-content/cache/minify/' in src else None
+        if bundle and '/photosnob.com/' in bundle: bundle = SRC + '/wp-content/cache/minify/' + bundle.rsplit('/', 1)[1]
+        is_woozone = bundle is not None and os.path.exists(bundle) and open(bundle, errors='replace').read(40).startswith('WooZone=')
+        if DROP_SCRIPT_IDS.match(sc.get('id', '')) or any(b in body for b in DROP_SCRIPT_BODY) or is_woozone:
             sc.decompose()
     # Prices (shown on product pages and in every product grid) and the WooZone price popups / country check
     for e in s.select('.price, #WooZone-price-disclaimer, .WooZone-country-check, .WooZone-product-data, [id^="WooZone-"]'):
@@ -56,6 +64,9 @@ def clean(path, t, shell_page=False):
         a['target'] = '_blank'; a['rel'] = 'nofollow sponsored noopener'
     for f in s.select('form.cart[action*="amazon."]'):
         f['target'] = '_blank'
+    # Show the product photo even before (or without) the gallery script, which normally fades it in
+    if s.select_one('.woocommerce-product-gallery') is not None:
+        st = s.new_tag('style'); st.string = '.woocommerce-product-gallery{opacity:1!important}'; s.head.append(st)
     # Jetpack "Related" posts load over WordPress AJAX, which no longer exists
     for e in s.select('#jp-relatedposts'):
         if not e.decomposed: e.decompose()
@@ -117,8 +128,9 @@ kept = []
 for p, f in sorted(page_files()):
     if p in DROP or p.split('/')[0] in DROP: continue
     t = open(f, encoding='utf-8', errors='replace').read()
-    # Addresses with non-ASCII characters were saved %-encoded; Cloudflare looks files up by the decoded name
-    dst = OUT + '/index.html' if p == 'index' else f'{OUT}/{urllib.parse.unquote(p)}/index.html'
+    # A few product addresses contain non-English characters (【 ，); Cloudflare can't serve files under those names,
+    # so they're stored under an ASCII name and worker/index.js maps the real address onto it
+    dst = OUT + '/index.html' if p == 'index' else f'{OUT}/{ascii_path(p)}/index.html'
     os.makedirs(os.path.dirname(dst), exist_ok=True)
     open(dst, 'w').write(str(clean(p, t)))
     kept.append('/' if p == 'index' else f'/{p}/')

@@ -10,6 +10,7 @@ The pages in `public/` are the live site's own HTML, styles and scripts, at thei
 - The search boxes go to `/search/`, a static search ([Pagefind](https://pagefind.app)) over every product and post, built on each deploy.
 - WooCommerce and WordPress files that came from the WordPress.com CDN (c0.wp.com) are served from `public/wp-cdn/`.
 - Jetpack related posts, Jetpack and WooCommerce stats, and the WooZone price popups were removed (they needed WordPress running). Google Analytics (G-0TM56Z4HTV) stays.
+- Six product addresses contain non-English characters (【 ，), which Cloudflare can't use as file names. Those pages are stored under ASCII names (each such character becomes `-`), and `worker/index.js` maps the real address onto them. The Worker only runs when no file matches.
 - `public/sitemap.xml` and `public/robots.txt` replace the WordPress sitemap plugin's.
 
 ## Editing

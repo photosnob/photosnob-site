@@ -1,11 +1,13 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "photosnob-site",
+  "main": "worker/index.js",
   "compatibility_date": "2026-06-01",
   "workers_dev": true,
   "preview_urls": true,
   "assets": {
     "directory": "./public",
+    "binding": "ASSETS",
     // WordPress URLs end in a slash: /affiliate-disclosure/ serves affiliate-disclosure/index.html; without the slash it redirects
     "html_handling": "auto-trailing-slash",
     "not_found_handling": "404-page"
